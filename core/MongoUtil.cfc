@@ -1,7 +1,7 @@
 <cfcomponent accessors="true">
 
-	<cfproperty name="mongoFactory">
-
+	<cfset variables.mongoFactory= "">
+	
 <cfscript>
 
 	/**

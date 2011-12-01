@@ -34,18 +34,22 @@ h2{
 	people = mongo.getDBCollection( collection );
 
 	//clear out the collection so we always start fresh, for demo purposes
-	people.remove({});
-
-
+	emptyStruct = {};
+	people.remove(emptyStruct);
+	
+	//cf8 doesn't allow nested struct/array creation in cfscript :'-(
+	kidArray = [];
+	kid = {NAME="Alexis", AGE=7, HAIR="blonde", DESCRIPTION="crazy" };
+	arrayAppend( kidArray, kid );
+	kid = {NAME="Sidney", AGE=2, HAIR="dirty blonde", DESCRIPTION="ornery" };
+	arrayAppend( kidArray, kid );
+	
 	//here's how to insert one document
 	doc =
 		{
 			NAME = "Marc",
 			SPOUSE = "Heather",
-			KIDS = [
-				{NAME="Alexis", AGE=7, HAIR="blonde", DESCRIPTION="crazy" },
-				{NAME="Sidney", AGE=2, HAIR="dirty blonde", DESCRIPTION="ornery" }
-			],
+			KIDS = kidArray,
 			BIKE = "Felt",
 			LOVESSQL = true,
 			LOVESMONGO = true,
@@ -68,14 +72,18 @@ h2{
 	//here's how to insert multiple documents
 	coolPeople = [];
 	for( i = 1; i LTE 5; i++ ){
+		//cf8 doesn't allow nested struct/array creation in cfscript :'-(
+		kidArray = [];
+		kid = {NAME="kid #i#", age=randRange(1,80), HAIR="strawberry", DESCRIPTION="fun" };
+		arrayAppend( kidArray, kid );
+		kid = {NAME="kid #i+1#", age=randRange(1,80), HAIR="raven", DESCRIPTION="joyful" };
+		arrayAppend( kidArray, kid );
+		
 		DOC =
 		{
 			NAME = "Cool Person #i#",
 			SPOUSE = "Cool Spouse #i#",
-			KIDS = [
-					{NAME="kid #i#", age=randRange(1,80), HAIR="strawberry", DESCRIPTION="fun" },
-					{NAME="kid #i+1#", age=randRange(1,80), HAIR="raven", DESCRIPTION="joyful" }
-			],
+			KIDS = kidArray,
 			BIKE = "Specialized",
 			TS = now(),
 			COUNTER = i
@@ -95,30 +103,35 @@ h2{
 	showResult( specialized, "Specialized riders" );
 
 	//find the 3rd and 4th Specialized bike riders, sorted by "ts" descending
-	specialized = people.query().$eq("BIKE", "Specialized").find( skip=2, limit=2, sort={"TS"=-1} );
+	sortParams = {TS=-1};
+	specialized = people.query().$eq("BIKE", "Specialized").find( skip=2, limit=2, sort=sortParams );
 	showResult( specialized, "Specialized riders, skipping to 3, limiting to 2, sorting by ts desc (skip is 0-based!)" );
 
 	//find riders with counter between 1 and 3, sorted by "ts" descending
+	sortParams = {TS=-1};
 	specialized = people.query()
 						.$eq("BIKE", "Specialized")
 						.between("COUNTER", 1, 3)
-						.find( sort={"TS"=-1} );
+						.find( sort=sortParams );
 	showResult( specialized, "Specialized riders, COUNTER between 1 and 3" );
 
 	//find riders with counter between 1 and 3 Exclusive, sorted by "ts" descending
+	sortParams = {TS=-1};
 	specialized = people.query()
 						.$eq("BIKE", "Specialized")
 						.betweenExclusive("COUNTER", 1, 3)
-						.find( sort={"TS"=-1});
+						.find( sort=sortParams);
 	showResult( specialized, "Specialized riders, COUNTER between 1 and 3 Exclusive" );
 
 	//find people with kids aged between 2 and 30
-	kidSearch = people.query().between("KIDS.AGE", 2, 30).find(keys="NAME,COUNTER,KIDS", sort={"COUNTER"=-1});
+	sortParams = {COUNTER=-1};
+	kidSearch = people.query().between("KIDS.AGE", 2, 30).find(keys="NAME,COUNTER,KIDS", sort=sortParams);
 	showResult( kidSearch, "People with kids aged between 2 and 30" );
 
 
 	//find a document by ObjectID... note that it returns the document, NOT a SearchResult object; here, we'll "spoof" what your app would do if the id were in the URL scope
-	url.personId = specialized.asArray()[1]["_id"].toString();
+	specializedArray = specialized.asArray();
+	url.personId = specializedArray[1]["_id"].toString();
 
 	byID = people.findById( url.personId );
 	writeOutput("<h2>Find by ID</h2>");
@@ -148,7 +161,8 @@ h2{
 	person = people.findOne();
 	person.FAVORITECIGAR = "H. Upmann Cubano";
 	person.MODTS = now();
-	arrayAppend( person.KIDS, {NAME = "Pauly", AGE = 0} );
+	kid = {NAME = "Pauly", AGE = 0};
+	arrayAppend( person.KIDS, kid );
 	people.update( person );
 
 	writeOutput("<h2>Updated Person</h2>");
@@ -158,7 +172,10 @@ h2{
 	person = {NAME = "Ima PHP dev", AGE=12};
 	people.save( person );
 
-	people.update( doc = {"$set" = {NAME = "Ima CF Dev", HAPPY = true}}, query= {NAME = "Ima PHP dev"} );
+	set = {NAME = "Ima CF Dev", HAPPY = true};
+	doc = {$set = set};
+	query = {NAME = "Ima PHP dev"};
+	people.update( doc = doc, query = query );
 	afterUpdate = people.findById( person["_id"] );
 
 	writeOutput("<h2>Updated person by criteria</h2>");
@@ -169,7 +186,9 @@ h2{
 	person = {NAME = "Ima PHP dev", AGE=12};
 	people.save( person );
 
-	people.update( doc={NAME = "Ima CF Dev", HAPPY = true}, query= {NAME = "Ima PHP dev"} );
+	doc = {NAME = "Ima CF Dev", HAPPY = true};
+	query = {NAME = "Ima PHP dev"};
+	people.update( doc=doc, query= query );
 	afterUpdate = people.findById( person["_id"] );
 
 	writeOutput("<h2>Updated person by criteria with overwrite. Notice it OVERWROTE the entire document because an update modifier ($set, $inc, etc) was not used</h2>");
@@ -178,13 +197,17 @@ h2{
 
 
 	//updating multiple documents
-	people.saveAll(
-		[{NAME = "EmoHipster", AGE=16},
-		{NAME = "EmoHipster", AGE=15},
-		{NAME = "EmoHipster", AGE=18}]
-	);
+	peopleArray = [];
+	person = {NAME = "EmoHipster", AGE=16};
+	ArrayAppend(peopleArray, person);
+	person = {NAME = "EmoHipster", AGE=15};
+	ArrayAppend(peopleArray, person);
+	person = {NAME = "EmoHipster", AGE=18};
+	ArrayAppend(peopleArray, person);
+	people.saveAll( peopleArray );
 
-	update = {"$set" = {NAME = "Oldster", AGE=76, REALIZED="tempus fugit"}};
+	set = {NAME = "Oldster", AGE=76, REALIZED="tempus fugit"};
+	update = {$set = set};
 	query = {NAME = "EmoHipster"};
 
 	people.update( doc = update, query = query, multi=true );
@@ -195,14 +218,20 @@ h2{
 	writeDump( var=oldsters, label="Even EmoHipsters get old some day", expand="false");
 
 	//perform an $inc update
-	cast = [{NAME = "Wesley", LIFELEFT=50, TORTUREMACHINE=true},
-		{NAME = "Spaniard", LIFELEFT=42, TORTUREMACHINE=false},
-		{NAME = "Giant", LIFELEFT=6, TORTUREMACHINE=false},
-		{NAME = "Poor Forest Walker", LIFELEFT=60, TORTUREMACHINE=true}];
+	cast = [];
+	castMember = {NAME = "Wesley", LIFELEFT=50, TORTUREMACHINE=true};
+	ArrayAppend(cast, castMember);
+	castMember = {NAME = "Spaniard", LIFELEFT=42, TORTUREMACHINE=false};
+	ArrayAppend(cast, castMember);
+	castMember = {NAME = "Giant", LIFELEFT=6, TORTUREMACHINE=false};
+	ArrayAppend(cast, castMember);
+	castMember = {NAME = "Poor Forest Walker", LIFELEFT=60, TORTUREMACHINE=true};
+	ArrayAppend(cast, castMember);
 
 	people.saveAll( cast );
 
-	suckLifeOut = {"$inc" = {LIFELEFT = -1}};
+	inc = {LIFELEFT = -1};
+	suckLifeOut = {$inc = inc};
 	victims = {TORTUREMACHINE = true};
 	people.update( doc = suckLifeOut, query = victims, multi = true );
 
@@ -235,19 +264,26 @@ h2{
 	//findAndModify: Great for Queuing!
 	//insert docs into a work queue; find the first 'pending' one and modify it to 'running'
 	tasksCol = mongo.getDBCollection( "tasks" );
-	tasksCol.remove( {} );
-	jobs = [
-		{STATUS = 'P', N = 1, DATA = 'Let it be'},
-		{STATUS = 'P', N = 2, DATA = 'Hey Jude!'},
-		{STATUS = 'P', N = 3, DATA = 'Ebony and Ivory'},
-		{STATUS = 'P', N = 4, DATA = 'Bang your head'}
-	];
+	emptyStruct = {};
+	tasksCol.remove( emptyStruct );
+	jobs = [];
+	job = {STATUS = 'P', N = 1, DATA = 'Let it be'};
+	ArrayAppend(jobs, job);
+	job = {STATUS = 'P', N = 2, DATA = 'Hey Jude!'};
+	ArrayAppend(jobs, job);
+	job = {STATUS = 'P', N = 3, DATA = 'Ebony and Ivory'};
+	ArrayAppend(jobs, job);
+	job = {STATUS = 'P', N = 4, DATA = 'Bang your head'};
+	ArrayAppend(jobs, job);
+	
 	tasksCol.saveAll( jobs );
 
 	query = {STATUS = 'P'};
-	update = {"$set" = {STATUS = 'R', started = now(), owner = cgi.server_name}};
+	set = {STATUS = 'R', started = now(), owner = cgi.server_name};
+	update = {$set = set};
 
-	nowScheduled = tasksCol.findAndModify( query = query, update = update, sort = {"N"=1} );
+	sort = {N=1};
+	nowScheduled = tasksCol.findAndModify( query = query, update = update, sort = sort );
 
 	writeOutput("<h2>findAndModify()</h2>");
 	writeDump(var=nowScheduled, label="findAndModify", expand="false");
@@ -255,9 +291,12 @@ h2{
 
 	writeOutput("<h2>Indexes</h2>");
 	//here's how to add indexes onto collections for faster querying
-	people.ensureIndex( ["NAME"] );
-	people.ensureIndex( ["BIKE"] );
-	people.ensureIndex( ["KIDS.AGE"] );
+	index = ["NAME"];
+	people.ensureIndex( index );
+	index = ["BIKE"];
+	people.ensureIndex( index );
+	index = ["KIDS.AGE"];
+	people.ensureIndex( index );
 	writeDump(var=people.getIndexes(), label="Indexes", expand="false");
 
 
