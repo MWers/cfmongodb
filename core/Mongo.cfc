@@ -38,7 +38,7 @@
 				variables.mongo.init( _server.getHost(), _server.getPort() );
 			}
 	
-			variables.mongoUtil = createObject('component','MongoUtil').init(mongoFactory);
+			setMongoUtil(createObject('component','MongoUtil').init(mongoFactory));
 	
 			return this;
 		</cfscript>
@@ -155,7 +155,7 @@
 		<cfargument name="mongoConfig">
 	
 		<cfscript>
-				variables.mongoConfig = arguments.mongoConfig;
+			variables.mongoConfig = arguments.mongoConfig;
 		</cfscript>
 	</cffunction>
 
@@ -167,7 +167,19 @@
 		<cfargument name="mongoFactory">
 	
 		<cfscript>
-				variables.mongoFactory = arguments.mongoFactory;
+			variables.mongoFactory = arguments.mongoFactory;
+		</cfscript>
+	</cffunction>
+
+	<cffunction name="getMongoUtil" access="public">
+		<cfreturn variables.mongoUtil>
+	</cffunction>
+
+	<cffunction name="setMongoUtil" access="public">
+		<cfargument name="mongoUtil">
+	
+		<cfscript>
+			variables.mongoUtil = arguments.mongoUtil;
 		</cfscript>
 	</cffunction>
 

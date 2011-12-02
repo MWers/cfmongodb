@@ -12,6 +12,8 @@ h2{
 
 <cfscript>
 
+	host = {serverName='192.168.145.31',serverPort='27017'};
+	hosts = [host];
 	if( url.useJavaLoader ){
 		//the fastest way to try out cfmongodb is using Mark Mandel's javaloader, which we ship with cfmongodb. Thanks Mark!
 		//http://javaloader.riaforge.org
@@ -21,9 +23,9 @@ h2{
 
 		//create a default MongoConfig instance; in your real apps, you'll create an object that extends MongoConfig and put your environment specific config in there
 		//here we initialize it with a db named 'mongorocks'
-		mongoConfig = createObject('component','cfmongodb.core.MongoConfig').init(dbName="mongorocks", mongoFactory=javaloaderFactory);
+		mongoConfig = createObject('component','cfmongodb.core.MongoConfig').init(hosts=hosts, dbName="mongorocks", mongoFactory=javaloaderFactory);
 	}else{
-		mongoConfig = createObject('component','cfmongodb.core.MongoConfig').init(dbName="mongorocks");
+		mongoConfig = createObject('component','cfmongodb.core.MongoConfig').init(hosts=hosts, dbName="mongorocks");
 	}
 
 	//initialize the core cfmongodb Mongo object
@@ -312,15 +314,28 @@ h2{
 
 	//close the Mongo instance. Very important!
 	mongo.close();
+</cfscript>
 
-
-	function showResult( searchResult, label ){
+<cffunction name="showResult">
+	<cfargument name="searchResult">
+	<cfargument name="label">
+	
+	<cfscript>
 		writeOutput("<h2>#label#</h2>");
 		writeDump( var=searchResult.asArray(), label=label & '(Result from MongoDB)', expand="false" );
 		writeOutput( "<br>Total #label# in this result, accounting for skip and limit: " & searchResult.size() );
 		writeOutput( "<br>Total #label#, ignoring skip and limit: " & searchResult.totalCount() );
 		writeOutput( "<br>Query: " & searchResult.getQuery().toString() );
 		writeOutput( "<br>Sort: " & searchResult.getSort().toString() & "<br>");
-	}
+	</cfscript>
+</cffunction>
 
-</cfscript>
+<!--- No writeDump in CF8 :-( --->
+<cffunction name="writeDump">
+	<cfargument name="var">
+	<cfargument name="label" default="">
+	<cfargument name="expand" default="false">
+	
+	<cfdump var="#arguments.var#" label="#arguments.label#" expand="#arguments.expand#">
+</cffunction>
+
