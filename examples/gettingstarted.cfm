@@ -96,17 +96,17 @@ h2{
 	people.saveAll( coolPeople );
 
 	//find Marc
-	marc = people.query().$eq("NAME", "Marc").find();
+	marc = people.query().$eq("NAME", "Marc")._find_();
 	showResult( marc, "Marcs" );
 
 
 	//find riders of Specialized bikes
-	specialized = people.query().$eq("BIKE", "Specialized").find();
+	specialized = people.query().$eq("BIKE", "Specialized")._find_();
 	showResult( specialized, "Specialized riders" );
 
 	//find the 3rd and 4th Specialized bike riders, sorted by "ts" descending
 	sortParams = {TS=-1};
-	specialized = people.query().$eq("BIKE", "Specialized").find( skip=2, limit=2, sort=sortParams );
+	specialized = people.query().$eq("BIKE", "Specialized")._find_( skip=2, limit=2, sort=sortParams );
 	showResult( specialized, "Specialized riders, skipping to 3, limiting to 2, sorting by ts desc (skip is 0-based!)" );
 
 	//find riders with counter between 1 and 3, sorted by "ts" descending
@@ -114,7 +114,8 @@ h2{
 	specialized = people.query()
 						.$eq("BIKE", "Specialized")
 						.between("COUNTER", 1, 3)
-						.find( sort=sortParams );
+						._find_( sort=sortParams );
+	writeDump(var=specialized, label="DEBUG: find riders with counter between 1 and 3, sorted by ts descending");
 	showResult( specialized, "Specialized riders, COUNTER between 1 and 3" );
 
 	//find riders with counter between 1 and 3 Exclusive, sorted by "ts" descending
@@ -122,12 +123,12 @@ h2{
 	specialized = people.query()
 						.$eq("BIKE", "Specialized")
 						.betweenExclusive("COUNTER", 1, 3)
-						.find( sort=sortParams);
+						._find_( sort=sortParams);
 	showResult( specialized, "Specialized riders, COUNTER between 1 and 3 Exclusive" );
 
 	//find people with kids aged between 2 and 30
 	sortParams = {COUNTER=-1};
-	kidSearch = people.query().between("KIDS.AGE", 2, 30).find(keys="NAME,COUNTER,KIDS", sort=sortParams);
+	kidSearch = people.query().between("KIDS.AGE", 2, 30)._find_(keys="NAME,COUNTER,KIDS", sort=sortParams);
 	showResult( kidSearch, "People with kids aged between 2 and 30" );
 
 
@@ -141,7 +142,7 @@ h2{
 
 	//using count(), SearchResult.totalCount(), and SearchResult.size()
 	totalPeople = people.query().between("KIDS.AGE", 2, 100).count();
-	searchResult =  people.query().between("KIDS.AGE", 2, 100).find(limit=3);//using limit to show difference between SearchResult.size() and totalCount()
+	searchResult =  people.query().between("KIDS.AGE", 2, 100)._find_(limit=3);//using limit to show difference between SearchResult.size() and totalCount()
 	alsoTotalPeople = searchResult.totalCount(); //equivalent to query().count()!
 	sizeWithLimit = searchResult.size();
 	writeOutput("<h2>How to count things</h2>");
@@ -214,7 +215,7 @@ h2{
 
 	people.update( doc = update, query = query, multi=true );
 
-	oldsters = people.query().$eq("NAME", "Oldster").find().asArray();
+	oldsters = people.query().$eq("NAME", "Oldster")._find_().asArray();
 
 	writeOutput("<h2>Updating multiple documents</h2>");
 	writeDump( var=oldsters, label="Even EmoHipsters get old some day", expand="false");
@@ -237,7 +238,7 @@ h2{
 	victims = {TORTUREMACHINE = true};
 	people.update( doc = suckLifeOut, query = victims, multi = true );
 
-	rugenVictims = people.query().$eq("TORTUREMACHINE", true).find().asArray();
+	rugenVictims = people.query().$eq("TORTUREMACHINE", true)._find_().asArray();
 
 	writeOutput("<h2>Atomically incrementing with $inc</h2>");
 	writeDump( var = cast, label="Before the movie started", expand=false);
@@ -305,7 +306,7 @@ h2{
 
 	//show how you get timestamp creation on all documents, for free, when using the default ObjectID
 	mongoUtil = mongo.getMongoUtil();
-	all = people.find().asArray();
+	all = people._find_().asArray();
 	first = all[1];
 	last = all[ arrayLen(all) ];
 	writeOutput("<h2>Timestamps from Doc</h2>");

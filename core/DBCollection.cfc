@@ -67,6 +67,18 @@
 		<cfreturn variables.collection>
 	</cffunction>
 
+	<cffunction name="getMongoUtil" access="public">
+		<cfreturn variables.mongoUtil>
+	</cffunction>
+
+	<cffunction name="setMongoUtil" access="public">
+		<cfargument name="mongoUtil">
+	
+		<cfscript>
+			variables.mongoUtil = arguments.mongoUtil;
+		</cfscript>
+	</cffunction>
+
 	<!--- function getNothing(){}; --->
 	<cffunction name="getNothing" access="public">
 		<cfreturn>

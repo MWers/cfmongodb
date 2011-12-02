@@ -143,7 +143,8 @@
 			if( isSimpleValue(keyValues) ){
 				keyValues = listToArray(keyValues);
 			}
-			for(kv in keyValues){
+			for(i = 1; i <= ArrayLen(keyValues); i++){
+				kv = keyValues[i];
 				if( isSimpleValue( kv ) ){
 					key = listFirst(kv, "=");
 					if( find("=",kv) ) {
