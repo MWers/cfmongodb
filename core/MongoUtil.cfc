@@ -81,7 +81,7 @@
 	<!--- Converts a ColdFusion structure to a CFBasicDBobject which ensures 1 and -1 remain ints --->
 	<!--- function toMongoOperation( struct data ){ --->
 	<cffunction name="toMongoOperation" access="public">
-		<cfargument name="data" type="struct">
+		<cfargument name="data">
 
 		<cfscript>
 			if( isCFBasicDBObject(data) ) return data;

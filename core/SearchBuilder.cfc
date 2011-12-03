@@ -177,7 +177,8 @@ mongoUtil = '';
 	<cfargument name="val">
 
 	<cfscript>
-		criteria = { $ne = val };
+		criteria = createObject('java', 'java.util.HashMap');
+		criteria.put("$ne", val);
 		builder.add( element, criteria );
 		return  this;
 	</cfscript>
@@ -189,7 +190,8 @@ mongoUtil = '';
 	<cfargument name="val">
 
 	<cfscript>
-		criteria = { $lt = val };
+		criteria = createObject('java', 'java.util.HashMap');
+		criteria.put("$lt", val);
 		builder.add( element, criteria );
 		return  this;
 	</cfscript>
@@ -201,7 +203,8 @@ mongoUtil = '';
 	<cfargument name="val">
 
 	<cfscript>
-		criteria = { $lte = val };
+		criteria = createObject('java', 'java.util.HashMap');
+		criteria.put("$lte", val);
 		builder.add( element, criteria );
 		return this;
 	</cfscript>
@@ -213,7 +216,8 @@ mongoUtil = '';
 	<cfargument name="val">
 
 	<cfscript>
-		criteria = { $gt = val };
+		criteria = createObject('java', 'java.util.HashMap');
+		criteria.put("$gt", val);
 		builder.add( element, criteria );
 		return this;
 	</cfscript>
@@ -225,8 +229,8 @@ mongoUtil = '';
 	<cfargument name="val">
 
 	<cfscript>
-		criteria = {};
-		criteria['$gte'] = val;
+		criteria = createObject('java', 'java.util.HashMap');
+		criteria.put("$gte", val);
 		builder.add( element, criteria );
 		return this;
 	</cfscript>
@@ -249,7 +253,9 @@ mongoUtil = '';
 	<cfargument name="upper">
 
 	<cfscript>
-		criteria = {$gte = lower, $lte = upper};
+		criteria = createObject('java', 'java.util.HashMap');
+		criteria.put("$gte", lower);
+		criteria.put("$lte", upper);
 		builder.add( element, criteria );
 		return this;
 	</cfscript>
@@ -261,7 +267,9 @@ mongoUtil = '';
 	<cfargument name="upper">
 
 	<cfscript>
-		criteria = {$gt = lower, $lt = upper};
+		criteria = createObject('java', 'java.util.HashMap');
+		criteria.put("$gt", lower);
+		criteria.put("$lt", upper);
 		builder.add( element, criteria );
 		return this;
 	</cfscript>
@@ -272,10 +280,10 @@ mongoUtil = '';
 	<cfargument name="val" type="date">
 
 	<cfscript>
-		exp = {};
-		 date = parseDateTime(val);
-		exp['$lte'] = date;
-		builder.add( element, exp );
+		date = parseDateTime(val);
+		criteria = createObject('java', 'java.util.HashMap');
+		criteria.put("$lte", date);
+		builder.add( element, criteria );
 		return this;
 	</cfscript>
 </cffunction>
@@ -285,10 +293,10 @@ mongoUtil = '';
 	<cfargument name="val" type="date">
 	
 	<cfscript>
-		exp = {};
 		date = parseDateTime(val);
-		exp['$gte'] = date;
-		builder.add( element, exp );
+		criteria = createObject('java', 'java.util.HashMap');
+		criteria.put("$gte", date);
+		builder.add( element, criteria );
 		return this;
 	</cfscript>
 </cffunction>

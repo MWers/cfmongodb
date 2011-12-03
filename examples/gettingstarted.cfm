@@ -115,7 +115,6 @@ h2{
 						.$eq("BIKE", "Specialized")
 						.between("COUNTER", 1, 3)
 						._find_( sort=sortParams );
-	writeDump(var=specialized, label="DEBUG: find riders with counter between 1 and 3, sorted by ts descending");
 	showResult( specialized, "Specialized riders, COUNTER between 1 and 3" );
 
 	//find riders with counter between 1 and 3 Exclusive, sorted by "ts" descending
@@ -176,7 +175,8 @@ h2{
 	people.save( person );
 
 	set = {NAME = "Ima CF Dev", HAPPY = true};
-	doc = {$set = set};
+	doc = createObject('java', 'java.util.HashMap');
+	doc.put("$set", set);
 	query = {NAME = "Ima PHP dev"};
 	people.update( doc = doc, query = query );
 	afterUpdate = people.findById( person["_id"] );
@@ -210,7 +210,8 @@ h2{
 	people.saveAll( peopleArray );
 
 	set = {NAME = "Oldster", AGE=76, REALIZED="tempus fugit"};
-	update = {$set = set};
+	update = createObject('java', 'java.util.HashMap');
+	update.put("$set", set);
 	query = {NAME = "EmoHipster"};
 
 	people.update( doc = update, query = query, multi=true );
@@ -283,7 +284,8 @@ h2{
 
 	query = {STATUS = 'P'};
 	set = {STATUS = 'R', started = now(), owner = cgi.server_name};
-	update = {$set = set};
+	update = createObject('java', 'java.util.HashMap');
+	update.put("$set", set);
 
 	sort = {N=1};
 	nowScheduled = tasksCol.findAndModify( query = query, update = update, sort = sort );

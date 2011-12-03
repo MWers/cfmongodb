@@ -48,7 +48,7 @@
 		<cfargument name="dbObject">
 		
 		<cfscript>
-			if( isNull( dbObject ) ){
+			if( NOT StructKeyExists( arguments, "dbObject" ) ){
 				return javacast("null","");
 			}
 			return mongoUtil.toCF( dbObject );
@@ -103,7 +103,7 @@
 		
 		<cfscript>
 			result = collection.findOne( toMongo( criteria ) );
-			if(NOT isNull(result) ){
+			if( StructKeyExists( variables, "result" ) ){
 				return toCF( result );
 			}
 		</cfscript>
@@ -186,19 +186,21 @@
 		<cfargument name="fields" type="struct">
 		<cfargument name="sort" type="struct">
 		<cfargument name="remove" type="boolean" default="false">
-		<cfargument name="update" type="struct">
+		<cfargument name="update">
 		<cfargument name="returnNew" type="boolean" default="true">
 		<cfargument name="upsert" type="boolean" default="false">
 		
 		<cfscript>
 			// Confirm our complex defaults exist; need this chunk of muck because CFBuilder 1 breaks with complex datatypes in defaults
-			sort = {_id=1};
+			sort = createObject('java', 'java.util.HashMap');
+			sort.put("_id", 1);
+			//sort = {_id=1};
 			fields = {};
 			
 			local.argumentDefaults = {sort=sort, fields=fields};
-			// for(local.k in local.argumentDefaults) {
-			for( i = 1; i <= ArrayLen(local.argumentDefaults); i++) {
-				local.k = local.argumentDefaults[i];
+			for(local.k in local.argumentDefaults) {
+			// for( i = 1; i <= ArrayLen(local.argumentDefaults); i++) {
+				// local.k = local.argumentDefaults[i];
 				if (!structKeyExists(arguments, local.k)) {
 					arguments[local.k] = local.argumentDefaults[local.k];
 				}
@@ -215,7 +217,7 @@
 				upsert
 			);
 			emptyStruct = {};
-			if( isNull(updated) ) return emptyStruct;
+			if( StructKeyExists(variables,"updated") ) return emptyStruct;
 	
 			return toCF(updated);
 		</cfscript>
@@ -429,8 +431,8 @@
 	<cffunction name="update" access="public">
 		<cfargument name="doc">
 		<cfargument name="query">
-		<cfargument name="upsert" default="">
-		<cfargument name="multi" default="">
+		<cfargument name="upsert" default="false">
+		<cfargument name="multi" default="false">
 
 		<cfscript>
 			if ( !structKeyExists(arguments, 'query') ){
@@ -445,6 +447,14 @@
 				keys = structKeyList(doc);
 			}
 			dbo = toMongo(doc);
+		</cfscript>
+		<!--- 
+		<cfdump var="#query#">
+		<cfdump var="#dbo#">
+		<cfdump var="#upsert#">
+		<cfdump var="#multi#">
+		 --->
+		<cfscript>
 			collection.update( query, dbo, upsert, multi );
 		</cfscript>
 	</cffunction>
