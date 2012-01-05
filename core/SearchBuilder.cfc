@@ -241,7 +241,8 @@ mongoUtil = '';
 	<cfargument name="exists" default="true">
 
 	<cfscript>
-		criteria = {$exists = javacast("boolean",exists)};
+		criteria = createObject('java', 'java.util.HashMap');
+		criteria.put("$exists", exists);
 		builder.add( element, criteria );
 		return this;
 	</cfscript>
