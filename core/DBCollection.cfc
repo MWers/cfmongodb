@@ -279,8 +279,8 @@
 	<cffunction name="mapReduce" access="public">
 		<cfargument name="map">
 		<cfargument name="reduce">
-		<cfargument name="outputTarget" default="REPLACE">
-		<cfargument name="outputType">
+		<cfargument name="outputTarget">
+		<cfargument name="outputType" default="REPLACE">
 		<cfargument name="query">
 		<cfargument name="options">
 
@@ -514,10 +514,15 @@
 	<cffunction name="ensureIndex" access="public" returnType="array">
 		<cfargument name="fields" type="array">
 		<cfargument name="unique" default="false">
+		<cfargument name="dropDups" default="false">
+		<cfargument name="sparse" default="false">
+		<cfargument name="background" default="false">
+		<cfargument name="name">
 
 		<cfscript>
 		 	pos = 1;
 		 	doc = {};
+		 	options = {};
 			indexName = "";
 			fieldName = "";
 	
@@ -531,13 +536,25 @@
 				}
 				indexName = listAppend( indexName, fieldName, "_");
 		 	}
+
+		 	if( Len(Trim(arguments.name)) EQ 0 ) {
+		 		indexName = "_#indexName#_";
+		 	} else {
+		 		indexName = arguments.name;
+		 	}
 	
-		 	dbo = toMongo( doc );
-		 	collection.ensureIndex( dbo, "_#indexName#_", unique );
+			options = {};
+			options["unique"] = arguments.unique;
+			options["name"] = indexName;
+			options["dropDups"] = arguments.dropDups;
+			options["sparse"] = arguments.sparse;
+			options["background"] = arguments.background;
+		 	collection.ensureIndex( toMongo( doc ), toMongo( options ) );
 	
 		 	return getIndexes(collectionName, mongoConfig);
 		</cfscript>
 	</cffunction>
+
 
 	<!--- Ensures a "2d" index on a single field. If another 2d index exists on the same collection, this will error --->
 	<!--- public array function ensureGeoIndex( field, min="", max="" ){ --->
